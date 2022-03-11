@@ -9,38 +9,40 @@ terraform {
 
 provider "docker" {}
 
+resource "null_resource" "docker_volume" {
+  provisioner "local-exec" {
+    command = "mkdir noderedvol || true && sudo chown 1000:1000 noderedvol"
+  }
+}
+
 resource "docker_image" "nodered_image" {
   name = "nodered/node-red:latest"
 
 }
 
 resource "random_string" "random" {
-  count = 2
+  count   = var.container_count
   length  = 4
   upper   = false
   special = false
 }
 
+resource "random_integer" "random_port" {
+  count = var.container_count
+  min   = 0
+  max   = 65535
+}
 
 resource "docker_container" "nodered_container" {
-  count = 2
+  count = var.container_count
   name  = join("-", ["nodered", random_string.random[count.index].result])
   image = docker_image.nodered_image.latest
   ports {
-    internal = 1880
-  # external = 1880
+    internal = var.int_port
+    external = random_integer.random_port[count.index].result
   }
-
-}
-
-output "IP-Address" {
-  value       = [for i in docker_container.nodered_container[*]: join(":", [i.ip_address], i.ports[*]["external"])]
-  description = "Container external IP address and port"
-
-}
-
-output "Container-Name" {
-  value       = docker_container.nodered_container[*].name
-  description = "Container name"
-
+  volumes {
+    host_path = var.docker_host_path
+    container_path = "/data"
+  }
 }
