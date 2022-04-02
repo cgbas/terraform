@@ -1,11 +1,4 @@
-terraform {
-  required_providers {
-    docker = {
-      source  = "kreuzwerker/docker"
-      version = "~> 2.16.0"
-    }
-  }
-}
+
 
 provider "docker" {}
 
@@ -15,8 +8,21 @@ resource "null_resource" "docker_volume" {
   }
 }
 
-resource "docker_image" "nodered_image" {
-  name = "nodered/node-red:latest"
+module "image" {
+  source = "./image"
+  image_in = var.image[terraform.workspace]
+}
+
+module "container" {
+  source = "./container"
+  depends_on = [null_resource.docker_volume]
+  count = var.container_count
+  name_in = join("-", ["nodered", random_string.random[count.index].result])
+  image_in = module.image.image_out
+  int_port_in = var.int_port
+  ext_port_in = var.ext_port
+  container_path_in = "/data"
+  host_path_in = ""${path.cwd}/noderedvol"
 
 }
 
@@ -33,16 +39,3 @@ resource "random_integer" "random_port" {
   max   = 65535
 }
 
-resource "docker_container" "nodered_container" {
-  count = var.container_count
-  name  = join("-", ["nodered", random_string.random[count.index].result])
-  image = docker_image.nodered_image.latest
-  ports {
-    internal = var.int_port
-    external = random_integer.random_port[count.index].result
-  }
-  volumes {
-    host_path = var.docker_host_path
-    container_path = "/data"
-  }
-}
