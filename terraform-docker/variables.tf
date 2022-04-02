@@ -27,11 +27,9 @@ variable "int_port" {
   }
 }
 
-variable "container_count" {
-  type    = number
-  default = 2
+locals {
+    container_count = length(var.ext_port[terraform.workspace])
 }
-
 variable "docker_host_path" {
   type = string
 }

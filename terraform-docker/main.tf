@@ -1,12 +1,6 @@
 
 
-provider "docker" {}
-
-resource "null_resource" "docker_volume" {
-  provisioner "local-exec" {
-    command = "mkdir noderedvol || true && sudo chown 1000:1000 noderedvol"
-  }
-}
+//provider "docker" {}
 
 module "image" {
   source = "./image"
@@ -15,15 +9,13 @@ module "image" {
 
 module "container" {
   source = "./container"
-  depends_on = [null_resource.docker_volume]
   count = var.container_count
   name_in = join("-", ["nodered", random_string.random[count.index].result])
   image_in = module.image.image_out
   int_port_in = var.int_port
   ext_port_in = var.ext_port
   container_path_in = "/data"
-  host_path_in = ""${path.cwd}/noderedvol"
-
+  host_path_in = "${path.cwd}/noderedvol"
 }
 
 resource "random_string" "random" {
@@ -33,9 +25,4 @@ resource "random_string" "random" {
   special = false
 }
 
-resource "random_integer" "random_port" {
-  count = var.container_count
-  min   = 0
-  max   = 65535
-}
 
