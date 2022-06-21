@@ -1,0 +1,3 @@
+[submodule "mtc-terraform"]
+	path = mtc-terraform
+	url = git@github.com:morethancertified/mtc-terraform.git
