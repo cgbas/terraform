@@ -22,13 +22,13 @@ resource "random_string" "random" {
   upper   = false
 }
 
-# resource "docker_container" "nodered_container" {
-
-#   image = docker_image.nodered_image.latest
-#   name  = join("-", ["nodered", random_string.random[0].result])
-#   ports {
-#     internal = 1880
-#     #external = 1880
-#   }
-# }
+resource "docker_container" "nodered_container" {
+  count = 2
+  image = docker_image.nodered_image.latest
+  name  = join("-", ["nodered", random_string.random[count.index].result])
+  ports {
+    internal = 1880
+    #external = 1880
+  }
+}
 
