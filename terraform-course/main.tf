@@ -15,11 +15,20 @@ resource "docker_image" "nodered_image" {
   name = "nodered/node-red:latest"
 }
 
-resource "docker_container" "nodered_container" {
-  image = docker_image.nodered_image.latest
-  name  = "nodered"
-  ports {
-    internal = 1880
-    external = 1880
-  }
+resource "random_string" "random" {
+  count   = 2
+  length  = 4
+  special = false
+  upper   = false
 }
+
+# resource "docker_container" "nodered_container" {
+
+#   image = docker_image.nodered_image.latest
+#   name  = join("-", ["nodered", random_string.random[0].result])
+#   ports {
+#     internal = 1880
+#     #external = 1880
+#   }
+# }
+
