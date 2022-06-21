@@ -15,7 +15,11 @@ resource "docker_image" "nodered_image" {
   name = "nodered/node-red:latest"
 }
 
-resource "docker_container" "foo" {
+resource "docker_container" "nodered_container" {
   image = docker_image.nodered_image.latest
-  name  = "foo"
+  name  = "nodered"
+  ports {
+    internal = 1880
+    external = 1880
+  }
 }
