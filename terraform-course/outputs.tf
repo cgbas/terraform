@@ -1,6 +1,6 @@
 output "container_address" {
   value = [for i in docker_container.nodered_container[*] :
-    join(":", [i.ip_address],i.ports[*]["external"])
+    join(":", [i.ip_address], i.ports[*]["external"])
   ]
   description = "The IP Address and External Port the container"
 }
